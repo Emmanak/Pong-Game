@@ -471,7 +471,7 @@
 		//drawParticle();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.drawImage(background, 0, 0)
+        ctx.drawImage(background, 0, 0);
 		//ctx.beginPath();
 		
 		//.closePath();
@@ -510,9 +510,9 @@
         
         if(data.x + data.dx > canvas.width-data.ballRadius || data.x + data.dx < data.ballRadius) { //bouncing off the side walls
             //data.dx = data.do
-            data.dx = -1*(105/100)*data.dx;
-            data.dy = (105/100)*data.dy;
-            data.paddleSpeed = (103/100)*data.paddleSpeed;
+            data.dx = -1*(115/100)*data.dx;
+            data.dy = (115/100)*data.dy;
+            data.paddleSpeed = (110/100)*data.paddleSpeed;
             
             wall_explosion.particleSetup(); 
             data.particle_select = 1;
@@ -524,10 +524,10 @@
             if(data.x > data.paddleX2 && data.x < data.paddleX2 + data.paddleWidth) {  //blue paddle hit detection
                 data.dy = -data.dy;
                 if(data.dx < 0) { 
-                    data.dx = (-1)*3;
+                    data.dx = (-1)*Math.abs(data.dy);
                 }
                 else if(data.dx > 0) {
-                    data.dx = 3;
+                    data.dx = Math.abs(data.dy);
                 }
                 
                     
@@ -573,10 +573,10 @@
 
                 
                 if(data.dx < 0) { 
-                    data.dx = (-1)*3;
+                    data.dx = (-1)*Math.abs(data.dy);
                 }
                 else if(data.dx > 0) {
-                    data.dx = 3;
+                    data.dx = Math.abs(data.dy);
                 }
                 /*
                 if(data.dx > data.paddleX + data.paddleWidth/3 && data.dx < data.paddleX + data.paddleWidth*(2/3)){
@@ -627,6 +627,7 @@
         }
 
         if (data.up2Pressed && data.dy > 0) {
+
             data.dx *= 0.99;
         }
         else if (data.down2Pressed && data.dy > 0) {
