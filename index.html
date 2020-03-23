@@ -370,8 +370,10 @@
 	function drawScore(){
 		ctx.font = "16px Arial";
 		ctx.fillStyle = "white";
-		ctx.fillText("Score: "+data.score_blue, 8, 20);
-		ctx.fillText("Score: "+data.score_red, 8, canvas.height-20);
+        ctx.fillText("Score: " + data.score_blue, 8, 40);
+        ctx.fillText("Controls: 'W' 'S' 'A' 'D' ", 8, 20);
+        ctx.fillText("Controls: 'up' 'down' 'left' 'right' Arrow Keys ", 8, canvas.height-20);
+		ctx.fillText("Score: "+data.score_red, 8, canvas.height-40);
 	}
 	
 //Static Object detection
