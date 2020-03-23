@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta charset="utf-8" />
+		<title>Some Pong Game</title>
+		<style>* { padding: 0; margin: 0; } canvas { background: #000; display: block; margin: 0 auto; }</style>
+</head> 
+<body> 
+
+<canvas id="myCanvas" width="1091" height="727"></canvas>
+
+<script type="text/javascript" src="/particles-js/js/sketch.js"></script>
+<script>
+	var canvas = document.getElementById("myCanvas");
+	var ctx = canvas.getContext("2d");
+
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+    saw_ball = new Image();
+    saw_ball.src = "emoji.png"; // can also be a remote URL e.g. http://
+
+
+	var data =  {
+		canvas: canvas,
+		ctx: ctx,
+		width: this.innerWidth,
+		height:this.innerHeight,
+
+		max_particles: 30,
+        particle_select: 0,
+		particle_size: this.innerWidth/(5*8),
+        particleArray: [],
+        box_particleArray: [],
+        exp_particleArray: [],
+		
+		ballRadius: this.innerWidth/48,
+		x: this.innerWidth/2,
+		y: this.innerHeight - (this.innerHeight/5),
+		dx: 3,
+		dy: -3,
+        do: 3,
+        
+        epos_x: 0,
+        epos_y: 0,
+
+		paddleHeight: this.innerHeight/50,
+		paddleWidth: this.innerWidth/4,
+		paddleX: this.innerWidth*(5/12),
+		paddleX2: this.innerWidth*(5/12),
+		paddleSpeed: 6,
+
+		a_key: 65,
+		d_key: 68,
+		right_key: 39,
+		left_key: 37,
+		rightPressed: false,
+		leftPressed: false,
+		right2Pressed: false,
+		left2Pressed: false,
+
+		brickRowCount: 1,
+		brickColumnCount: 8,
+		brickWidth: this.innerWidth/(2*8)/* 8 is brickColumnCount*/,
+		brickHeight: this.innerWidth/(2*8),
+
+		brickPadding: this.innerWidth/(2*8),
+		brickOffsetTop: (this.innerHeight - this.innerWidth/(2*8))/2,
+		brickOffsetLeft: this.innerWidth/(4*8)/* 8 is brickColumnCount*/,
+		bricks: [],
+		score_red: 0,
+		score_blue: 0,
+		score_switch: 0
+	}
+    
+    
+    class CreateParticle{
+        
+        constructor(data){
+            this.alive = 0;
+            this.size = Math.floor(Math.random() * data.particle_size+3);
+            this.x = data.x 
+            this.y = data.y
+            this.vy = Math.floor(Math.random() * 15+1); //add one to not have any flakes fall off at 0 pixels (speed?)
+            this.vx = Math.floor(Math.random() * 15+1);
+            this.direction = Math.round(Math.random()*3);
+            
+            switch(this.direction){
+              case 0:
+              this.vy *=-1;
+              this.vx *=1;
+              break;
+
+              case 1:
+              this.vy *=1;
+              this.vx *=-1;
+              break;
+
+              case 2:
+              this.vy *=1;
+              this.vx *=1;
+              break;
+
+              case 3:
+              this.vy *=-1;
+              this.vx *=-1;
+              break;
+
+              default:
+              this.vy *=-1;
+              this.vx *=1;
+              break;
+
+            }
+        
+        
+        
+        }
+    }
+    
+    class Explosion{
+        
+        
+        
+        contructor(data){
+            
+            
+        }
+        
+        
+        
+        
+        particleSetup(){
+            
+            
+            
+            for (var i = 0; i < data.max_particles; i++) {
+			data.particleArray.push( new CreateParticle(data));
+			}
+            //console.log(data.particleArray);
+            
+        }
+        
+        drawParticle(color) {
+            
+            
+            if(data.particleArray == null){
+            return 0;
+            }
+            else{
+                
+                for (var i = 0; i < 50; i++) {
+                    
+                    if(data.particleArray[i] != null){
+                    
+                    data.particleArray[i].alive = 1;
+                    data.ctx.beginPath();
+                    data.ctx.fillStyle = "orange"//color/*'#0095DD'*/;
+                    data.ctx.ellipse(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size, data.particleArray[i].size/2, Math.atan(data.particleArray[i].vy/data.particleArray[i].vx), 0, 2 * Math.PI);   
+                    //data.ctx.arc(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size ,0, Math.PI*2);
+                    data.ctx.fill();
+                    data.ctx.closePath();
+                        
+                        
+            
+            
+
+                 if(data.particleArray[i].size > 0){ 
+                     
+                     if(data.particleArray[i].vx + data.particleArray[i].x > data.width-10 || data.particleArray[i].vx + data.particleArray[i].x < 10){
+                            data.particleArray[i].vx =-1*data.particleArray[i].vx;
+                        
+                        }
+                     data.particleArray[i].y += data.particleArray[i].vy;
+                     data.particleArray[i].x += data.particleArray[i].vx;
+                     data.particleArray[i].size -=0.25;
+
+                    
+
+                    }
+                  else{ 
+                      
+                      data.particleArray.splice(i,1);
+
+                    
+
+
+                  }
+                    
+                    }
+                    
+
+                }
+                
+            }
+          
+      }
+        
+        
+   
+    }
+    
+    
+
+    var pbox_explosion = new Explosion(data);
+    var wall_explosion = new Explosion(data);
+    var padr_explosion = new Explosion(data);
+    var padb_explosion = new Explosion(data);
+    
+
+//keyboard and mouse control functions
+    window.addEventListener("keydown", keyDownHandler, false);
+    window.addEventListener("keyup", keyUpHandler, false);
+    //document.addEventListener("mousemove", mouseMoveHandler, false);
+
+    function keyDownHandler(e) {
+        if(e.keyCode == data.right_key) {
+            data.rightPressed = true;
+        }
+        else if(e.keyCode == data.left_key) {
+            data.leftPressed = true;
+        }
+        
+        if(e.keyCode == data.a_key) {
+			data.left2Pressed = true;
+		}
+		else if(e.keyCode == data.d_key) {
+			data.right2Pressed = true;
+		}
+    }
+    function keyUpHandler(e) {
+        if(e.keyCode == data.right_key) {
+            data.rightPressed = false;
+        }
+        else if(e.keyCode == data.left_key) {
+            data.leftPressed = false;
+        }
+        else if(e.keyCode == data.d_key) {
+			data.right2Pressed = false;
+		}
+		else if(e.keyCode == data.a_key) {
+			data.left2Pressed = false;
+		}
+	}
+	
+	
+    
+//Creating static objects    
+    for(var c=0; c<data.brickColumnCount; c++){
+		data.bricks[c] = []; //array contained static objects
+		for(var r=0; r<data.brickRowCount; r++){
+			data.bricks[c][r] = { x: 0, y: 0, status: 1 };
+		}
+	}
+	
+	function drawBricks(){
+		for(var c=0; c<data.brickColumnCount; c++) {
+			for(var r=0; r<data.brickRowCount; r++){
+				if(data.bricks[c][r].status == 1){
+					var brickX = (c*(data.brickWidth+data.brickPadding))+data.brickOffsetLeft;
+					var brickY = (r*(data.brickHeight+data.brickPadding))+data.brickOffsetTop;
+					data.bricks[c][r].x = brickX;
+					data.bricks[c][r].y = brickY;
+					ctx.beginPath();
+					ctx.rect(brickX, brickY, data.brickWidth, data.brickHeight);
+					//ctx.arc(brickX+brickPadding, brickY, brickWidth/2, 0, Math.PI*2 );
+					ctx.fillStyle = "#0095DD";
+					ctx.fill();
+					ctx.closePath();
+				}
+			}
+		}
+	}
+	
+	function drawScore(){
+		ctx.font = "16px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("Blue Score: "+data.score_blue, 8, 20);
+		ctx.fillText("Red Score: "+data.score_red, 8, canvas.height-20);
+	}
+	
+//Static Object detection
+	function collisionDetection(){
+		for(var c=0; c<data.brickColumnCount; c++){
+			for(var r=0; r<data.brickRowCount; r++){
+				var b = data.bricks[c][r];
+				if(b.status == 1){
+					if( data.x > b.x && data.x < b.x+data.brickWidth && data.y > b.y && data.y < b.y+data.brickHeight){
+						//dy = (105/100)*dy;
+						b.status = 0;
+						
+						//pbox_explosion.particleArray = data.particleArray; 
+                        pbox_explosion.particleSetup();
+                        data.particle_select = 0;
+                        //data.box_particleArray = data.particleArray;
+						//pbox_explosion.createParticle();
+						
+						//if(mainScore == brickRowCount*brickColumnCount){ //if all the blocks are gone
+							//alert("YOU WIN, CONGRATS");
+							//document.location.reload();
+							//clearInterval(interval); //needed for Chrome
+						//}
+					}
+					
+				}
+			}
+		}
+	}
+
+// dynamic-object rendering
+	function drawP1() {
+		ctx.beginPath();
+		ctx.rect(data.paddleX,canvas.height-data.paddleHeight ,data.paddleWidth ,data.paddleHeight);
+		ctx.fillStyle = "red";
+		ctx.fill();
+		ctx.closePath();
+	}
+
+	function drawP2() {
+		ctx.beginPath();
+		ctx.rect(data.paddleX2,0, data.paddleWidth, data.paddleHeight);
+		ctx.fillStyle = "blue";
+		ctx.fill();
+		ctx.closePath();
+	}
+
+	function drawBall() {
+		ctx.beginPath();
+		
+		ctx.arc(data.x,data.y, data.ballRadius, 0, Math.PI*2);
+        /*saw_ball.onload = function() {
+            ctx.drawImage(saw_ball,data.x,data.y);
+        };*/
+		ctx.fillStyle = "white";
+		ctx.fill();
+		ctx.closePath();
+	}
+	
+
+// main rendering function for all objects
+    function draw() {
+		//drawParticle();
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		//ctx.beginPath();
+		
+		//.closePath();
+		//drawParticle();
+
+        drawBall();
+        drawP1();
+        drawP2();
+        
+		drawBricks();
+		
+        collisionDetection();
+		drawScore();
+        
+        for(var i=0; i < 4; i++)
+        {
+            switch(data.particle_select){
+            case 0:
+                pbox_explosion.drawParticle('#0095DD');
+                break;
+            case 1:
+                wall_explosion.drawParticle("grey");
+                break;
+            case 2:
+                padr_explosion.drawParticle("red");
+                break;
+            case 3:
+                padb_explosion.drawParticle("blue");
+                break;
+                
+            default:
+                break;
+            
+        
+        }}
+        
+        if(data.x + data.dx > canvas.width-data.ballRadius || data.x + data.dx < data.ballRadius) { //bouncing off the side walls
+            //data.dx = data.do
+            data.dx = -1*(101/100)*data.dx;
+            data.dy = (101/100)*data.dy;
+            //data.paddleSpeed = (130/100)*data.paddleSpeed;
+            
+            wall_explosion.particleSetup(); 
+            data.particle_select = 1;
+            //data.exp_particleArray = data.particleArray;
+            
+            
+        }
+        if(data.y + data.dy < data.ballRadius) { //top (blue) paddle
+            if(data.x > data.paddleX2 && data.x < data.paddleX2 + data.paddleWidth) {  //blue paddle hit detection
+                data.dy = -data.dy;
+                
+                    
+           /*
+                
+                    if(data.right2pressed = true){
+                        data.do = data.dx
+                        data.dx = data.dx/10;
+                        //data.dx +=data.dx;
+                        }
+                    else if(data.left2pressed = true){
+                        data.do = data.dx
+                        //data.dx -=data.dx;
+                        data.dx = data.dx*2;
+                        }
+                    else if(data.s_pressed = true){
+                            data.do = data.dx;
+                            data.dx = data.dx/10;
+                    }
+                    else{
+                        data.dx = data.do;
+                    }
+                    console.log(data.dx);
+                console.log(data.right2pressed);
+                    
+                    
+                
+                */
+                
+                data.score_blue++;
+                padb_explosion.particleSetup();
+                data.particle_select = 3;
+            }
+            else {
+               // clearInterval(game);
+                //alert("GAME OVER");
+                document.location.reload();
+            }
+        }
+        else if(data.y + data.dy > canvas.height-data.ballRadius) {  // bottom (red) paddle
+            if(data.x > data.paddleX && data.x < data.paddleX + data.paddleWidth) { //red paddle hit detection
+                data.dy = -data.dy;
+                /*
+                if(data.dx > data.paddleX + data.paddleWidth/3 && data.dx < data.paddleX + data.paddleWidth*(2/3)){
+                    data.dx = data.dx/10;
+           
+                }
+                else{
+                        if(data.right2pressed = true){
+                        data.do = data.dx
+                        data.dx +=data.dx;
+                        }
+                        else if(data.left2pressed = true){
+                        data.do = data.dx
+                        data.dx -=data.dx;
+                        }
+                    
+                }*/
+                data.score_red++;
+                padr_explosion.particleSetup();
+                data.particle_select = 2; 
+            }
+            else {
+               // clearInterval(game);
+                //alert("GAME OVER");
+                document.location.reload();
+            }
+        }
+
+        if(data.rightPressed && data.paddleX < canvas.width-data.paddleWidth) {
+            data.paddleX += data.paddleSpeed;
+        }
+        else if(data.leftPressed && data.paddleX > 0) {
+            data.paddleX -= data.paddleSpeed;
+        }
+        
+        if(data.right2Pressed && data.paddleX2 < canvas.width-data.paddleWidth) {
+            data.paddleX2 += data.paddleSpeed;
+        }
+        else if(data.left2Pressed && data.paddleX2 > 0) {
+            data.paddleX2 -= data.paddleSpeed;
+        }
+
+        data.x += data.dx;
+        data.y += data.dy;
+        
+        requestAnimationFrame(draw);
+    }
+
+	draw();
+
+    
+    
+		
+</script> 
+
+
+</body>
+</html>
