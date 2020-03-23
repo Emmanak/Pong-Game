@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
 		<meta charset="utf-8" />
@@ -26,7 +26,7 @@
 		width: this.innerWidth,
 		height:this.innerHeight,
 
-		max_particles: 30,
+		max_particles: 50,
         particle_select: 0,
 		particle_size: this.innerWidth/(5*8),
         particleArray: [],
@@ -50,13 +50,21 @@
 		paddleSpeed: 6,
 
 		a_key: 65,
-		d_key: 68,
+        d_key: 68,
+        w_key: 87,
+        s_key: 83,
 		right_key: 39,
-		left_key: 37,
-		rightPressed: false,
+        left_key: 37,
+        up_key: 38,
+        down_key: 40,
+        rightPressed: false,
+        upPressed: false,
+        downPressed: false,
 		leftPressed: false,
 		right2Pressed: false,
-		left2Pressed: false,
+        left2Pressed: false,
+        up2Pressed: false,
+        down2pressed: false,
 
 		brickRowCount: 1,
 		brickColumnCount: 8,
@@ -150,12 +158,17 @@
                 
                 for (var i = 0; i < 50; i++) {
                     
-                    if(data.particleArray[i] != null){
-                    
+                    if (data.particleArray[i] != null) {
+                        if (data.particleArray[i].alive == 0) {
+                            data.particleArray[i].x = data.x;
+                            data.particleArray[i].y = data.y;
+
+                        }
                     data.particleArray[i].alive = 1;
                     data.ctx.beginPath();
-                    data.ctx.fillStyle = "orange"//color/*'#0095DD'*/;
-                    data.ctx.ellipse(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size, data.particleArray[i].size/2, Math.atan(data.particleArray[i].vy/data.particleArray[i].vx), 0, 2 * Math.PI);   
+                    data.ctx.fillStyle = color;//"orange"//color/*'#0095DD'*/;
+                    data.ctx.ellipse(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size, data.particleArray[i].size/2, Math.atan(data.particleArray[i].vy/data.particleArray[i].vx), 0, 2 * Math.PI);
+                    //data.ctx.ellipse(data.x, data.y, data.particleArray[i].size, data.particleArray[i].size/2, Math.atan(data.particleArray[i].vy/data.particleArray[i].vx), 0, 2 * Math.PI);
                     //data.ctx.arc(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size ,0, Math.PI*2);
                     data.ctx.fill();
                     data.ctx.closePath();
@@ -164,7 +177,7 @@
             
             
 
-                 if(data.particleArray[i].size > 0){ 
+                 if(data.particleArray[i].size > 1){ 
                      
                      if(data.particleArray[i].vx + data.particleArray[i].x > data.width-10 || data.particleArray[i].vx + data.particleArray[i].x < 10){
                             data.particleArray[i].vx =-1*data.particleArray[i].vx;
@@ -172,7 +185,9 @@
                         }
                      data.particleArray[i].y += data.particleArray[i].vy;
                      data.particleArray[i].x += data.particleArray[i].vx;
-                     data.particleArray[i].size -=0.25;
+                     data.particleArray[i].size *= 0.97;
+                     data.particleArray[i].vy += 0.15 
+                     data.particleArray[i].vx *= 0.98
 
                     
 
@@ -225,6 +240,20 @@
 		}
 		else if(e.keyCode == data.d_key) {
 			data.right2Pressed = true;
+        }
+
+        if (e.keyCode == data.w_key) {
+            data.up2Pressed = true;
+		}
+        else if (e.keyCode == data.a_key) {
+            data.down2pressed = true;
+        }
+
+        if (e.keyCode == data.up_key) {
+            data.upPressed = true;
+		}
+        else if (e.keyCode == data.down_key) {
+            data.downpressed = true;
 		}
     }
     function keyUpHandler(e) {
@@ -239,6 +268,20 @@
 		}
 		else if(e.keyCode == data.a_key) {
 			data.left2Pressed = false;
+        }
+
+        if (e.keyCode == data.w_key) {
+            data.up2Pressed = false;
+		}
+        else if (e.keyCode == data.a_key) {
+            data.down2pressed = false;
+        }
+
+        if (e.keyCode == data.up_key) {
+            data.upPressed = false;
+		}
+        else if (e.keyCode == data.down_key) {
+            data.downpressed = false;
 		}
 	}
 	
@@ -361,7 +404,7 @@
                 pbox_explosion.drawParticle('#0095DD');
                 break;
             case 1:
-                wall_explosion.drawParticle("grey");
+                wall_explosion.drawParticle("white");
                 break;
             case 2:
                 padr_explosion.drawParticle("red");
@@ -378,9 +421,9 @@
         
         if(data.x + data.dx > canvas.width-data.ballRadius || data.x + data.dx < data.ballRadius) { //bouncing off the side walls
             //data.dx = data.do
-            data.dx = -1*(101/100)*data.dx;
-            data.dy = (101/100)*data.dy;
-            //data.paddleSpeed = (130/100)*data.paddleSpeed;
+            data.dx = -1*(105/100)*data.dx;
+            data.dy = (105/100)*data.dy;
+            data.paddleSpeed = (103/100)*data.paddleSpeed;
             
             wall_explosion.particleSetup(); 
             data.particle_select = 1;
