@@ -15,9 +15,24 @@
 	var ctx = canvas.getContext("2d");
 
 	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-    saw_ball = new Image();
-    saw_ball.src = "emoji.png"; // can also be a remote URL e.g. http://
+    canvas.height = window.innerHeight;
+
+
+    function importImage(image) {
+        var imageVar = new Image();
+        imageVar.src = image;
+        return imageVar;
+    }
+
+
+
+    saw_ball = importImage("emoji.png"); // can also be a remote URL e.g. http://
+    box_image = importImage("crate.png");
+    background = importImage("background.png");
+    ball_image = importImage("ball.png");
+    lower_paddle = importImage("lower_platform.png");
+    upper_paddle = importImage("upper_platform.png");
+
 
 
 	var data =  {
@@ -28,7 +43,8 @@
 
 		max_particles: 50,
         particle_select: 0,
-		particle_size: this.innerWidth/(5*8),
+		//particle_size: this.innerWidth/(5*8),
+        particle_size: this.innerWidth/(7*8),
         particleArray: [],
         box_particleArray: [],
         exp_particleArray: [],
@@ -47,7 +63,7 @@
 		paddleWidth: this.innerWidth/4,
 		paddleX: this.innerWidth*(5/12),
 		paddleX2: this.innerWidth*(5/12),
-		paddleSpeed: 6,
+		paddleSpeed: 10,
 
 		a_key: 65,
         d_key: 68,
@@ -71,6 +87,8 @@
 		brickWidth: this.innerWidth/(2*8)/* 8 is brickColumnCount*/,
 		brickHeight: this.innerWidth/(2*8),
 
+        
+
 		brickPadding: this.innerWidth/(2*8),
 		brickOffsetTop: (this.innerHeight - this.innerWidth/(2*8))/2,
 		brickOffsetLeft: this.innerWidth/(4*8)/* 8 is brickColumnCount*/,
@@ -78,7 +96,7 @@
 		score_red: 0,
 		score_blue: 0,
 		score_switch: 0
-	}
+    }
     
     
     class CreateParticle{
@@ -166,7 +184,7 @@
                         }
                     data.particleArray[i].alive = 1;
                     data.ctx.beginPath();
-                    data.ctx.fillStyle = color;//"orange"//color/*'#0095DD'*/;
+                    data.ctx.fillStyle = '#42e3ff';//"orange"//color/*'#0095DD'*/;
                     data.ctx.ellipse(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size, data.particleArray[i].size/2, Math.atan(data.particleArray[i].vy/data.particleArray[i].vx), 0, 2 * Math.PI);
                     //data.ctx.ellipse(data.x, data.y, data.particleArray[i].size, data.particleArray[i].size/2, Math.atan(data.particleArray[i].vy/data.particleArray[i].vx), 0, 2 * Math.PI);
                     //data.ctx.arc(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size ,0, Math.PI*2);
@@ -245,15 +263,15 @@
         if (e.keyCode == data.w_key) {
             data.up2Pressed = true;
 		}
-        else if (e.keyCode == data.a_key) {
-            data.down2pressed = true;
+        else if (e.keyCode == data.s_key) {
+            data.down2Pressed = true;
         }
 
         if (e.keyCode == data.up_key) {
             data.upPressed = true;
 		}
         else if (e.keyCode == data.down_key) {
-            data.downpressed = true;
+            data.downPressed = true;
 		}
     }
     function keyUpHandler(e) {
@@ -273,15 +291,15 @@
         if (e.keyCode == data.w_key) {
             data.up2Pressed = false;
 		}
-        else if (e.keyCode == data.a_key) {
-            data.down2pressed = false;
+        else if (e.keyCode == data.s_key) {
+            data.down2Pressed = false;
         }
 
         if (e.keyCode == data.up_key) {
             data.upPressed = false;
 		}
         else if (e.keyCode == data.down_key) {
-            data.downpressed = false;
+            data.downPressed = false;
 		}
 	}
 	
@@ -303,10 +321,11 @@
 					var brickY = (r*(data.brickHeight+data.brickPadding))+data.brickOffsetTop;
 					data.bricks[c][r].x = brickX;
 					data.bricks[c][r].y = brickY;
-					ctx.beginPath();
-					ctx.rect(brickX, brickY, data.brickWidth, data.brickHeight);
+                    ctx.beginPath();
+                    ctx.drawImage(box_image, brickX, brickY, data.brickHeight, data.brickHeight);
+					//ctx.rect(brickX, brickY, data.brickWidth, data.brickHeight);
 					//ctx.arc(brickX+brickPadding, brickY, brickWidth/2, 0, Math.PI*2 );
-					ctx.fillStyle = "#0095DD";
+					//ctx.fillStyle = "#0095DD";
 					ctx.fill();
 					ctx.closePath();
 				}
@@ -317,8 +336,8 @@
 	function drawScore(){
 		ctx.font = "16px Arial";
 		ctx.fillStyle = "white";
-		ctx.fillText("Blue Score: "+data.score_blue, 8, 20);
-		ctx.fillText("Red Score: "+data.score_red, 8, canvas.height-20);
+		ctx.fillText("Score: "+data.score_blue, 8, 20);
+		ctx.fillText("Score: "+data.score_red, 8, canvas.height-20);
 	}
 	
 //Static Object detection
@@ -352,15 +371,17 @@
 // dynamic-object rendering
 	function drawP1() {
 		ctx.beginPath();
-		ctx.rect(data.paddleX,canvas.height-data.paddleHeight ,data.paddleWidth ,data.paddleHeight);
+        //ctx.rect(data.paddleX, canvas.height - data.paddleHeight, data.paddleWidth, data.paddleHeight);
+        ctx.drawImage(lower_paddle, data.paddleX, canvas.height - data.paddleHeight, data.paddleWidth, data.paddleHeight);
 		ctx.fillStyle = "red";
 		ctx.fill();
 		ctx.closePath();
 	}
 
 	function drawP2() {
-		ctx.beginPath();
-		ctx.rect(data.paddleX2,0, data.paddleWidth, data.paddleHeight);
+        ctx.beginPath();
+        ctx.drawImage(upper_paddle, data.paddleX2, 0, data.paddleWidth, data.paddleHeight);
+		//ctx.rect(data.paddleX2,0, data.paddleWidth, data.paddleHeight);
 		ctx.fillStyle = "blue";
 		ctx.fill();
 		ctx.closePath();
@@ -368,8 +389,9 @@
 
 	function drawBall() {
 		ctx.beginPath();
-		
-		ctx.arc(data.x,data.y, data.ballRadius, 0, Math.PI*2);
+
+        ctx.drawImage(ball_image, data.x, data.y, data.ballRadius * 2, data.ballRadius * 2);
+		//ctx.arc(data.x,data.y, data.ballRadius, 0, Math.PI*2);
         /*saw_ball.onload = function() {
             ctx.drawImage(saw_ball,data.x,data.y);
         };*/
@@ -382,7 +404,9 @@
 // main rendering function for all objects
     function draw() {
 		//drawParticle();
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.drawImage(background, 0, 0)
 		//ctx.beginPath();
 		
 		//.closePath();
@@ -434,6 +458,12 @@
         if(data.y + data.dy < data.ballRadius) { //top (blue) paddle
             if(data.x > data.paddleX2 && data.x < data.paddleX2 + data.paddleWidth) {  //blue paddle hit detection
                 data.dy = -data.dy;
+                if(data.dx < 0) { 
+                    data.dx = (-1)*3;
+                }
+                else if(data.dx > 0) {
+                    data.dx = 3;
+                }
                 
                     
            /*
@@ -472,9 +502,17 @@
                 document.location.reload();
             }
         }
-        else if(data.y + data.dy > canvas.height-data.ballRadius) {  // bottom (red) paddle
+        else if (data.y + data.dy > canvas.height - (2*data.ballRadius)) {  // bottom (red) paddle
             if(data.x > data.paddleX && data.x < data.paddleX + data.paddleWidth) { //red paddle hit detection
                 data.dy = -data.dy;
+
+                
+                if(data.dx < 0) { 
+                    data.dx = (-1)*3;
+                }
+                else if(data.dx > 0) {
+                    data.dx = 3;
+                }
                 /*
                 if(data.dx > data.paddleX + data.paddleWidth/3 && data.dx < data.paddleX + data.paddleWidth*(2/3)){
                     data.dx = data.dx/10;
@@ -515,6 +553,21 @@
         else if(data.left2Pressed && data.paddleX2 > 0) {
             data.paddleX2 -= data.paddleSpeed;
         }
+
+        if(data.upPressed && data.dy <  0 ) {
+            data.dx *= 0.99;
+        }
+        else if (data.downPressed && data.dy < 0) {
+            data.dx *= 1.01;
+        }
+
+        if (data.up2Pressed && data.dy > 0) {
+            data.dx *= 0.99;
+        }
+        else if (data.down2Pressed && data.dy > 0) {
+            data.dx *= 1.01;
+        }
+
 
         data.x += data.dx;
         data.y += data.dy;
