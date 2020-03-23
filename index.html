@@ -32,6 +32,11 @@
     ball_image = importImage("ball.png");
     lower_paddle = importImage("lower_platform.png");
     upper_paddle = importImage("upper_platform.png");
+    explosion_imgs = [];
+
+    for (i = 1; i < 64; i++) {
+        explosion_imgs[i] = importImage(`explosions/explosion_${i}.png`);
+    }
 
 
 
@@ -44,7 +49,7 @@
 		max_particles: 50,
         particle_select: 0,
 		//particle_size: this.innerWidth/(5*8),
-        particle_size: this.innerWidth/(7*8),
+        particle_size: this.innerWidth/(8*8),
         particleArray: [],
         box_particleArray: [],
         exp_particleArray: [],
@@ -91,7 +96,12 @@
 
 		brickPadding: this.innerWidth/(2*8),
 		brickOffsetTop: (this.innerHeight - this.innerWidth/(2*8))/2,
-		brickOffsetLeft: this.innerWidth/(4*8)/* 8 is brickColumnCount*/,
+        brickOffsetLeft: this.innerWidth / (4 * 8)/* 8 is brickColumnCount*/,
+        brickexplosionX: 110,
+        brickexplosionY: 32,
+        brickexplosionDX: 71,
+        brickexplosionDY: 71,
+
 		bricks: [],
 		score_red: 0,
 		score_blue: 0,
@@ -174,52 +184,58 @@
             }
             else{
                 
-                for (var i = 0; i < 50; i++) {
-                    
-                    if (data.particleArray[i] != null) {
-                        if (data.particleArray[i].alive == 0) {
-                            data.particleArray[i].x = data.x;
-                            data.particleArray[i].y = data.y;
+                for (var j = 0; j < 1; j++) {
+                    for (var i = 0; i < 50; i++) {
 
-                        }
-                    data.particleArray[i].alive = 1;
-                    data.ctx.beginPath();
-                    data.ctx.fillStyle = '#42e3ff';//"orange"//color/*'#0095DD'*/;
-                    data.ctx.ellipse(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size, data.particleArray[i].size/2, Math.atan(data.particleArray[i].vy/data.particleArray[i].vx), 0, 2 * Math.PI);
-                    //data.ctx.ellipse(data.x, data.y, data.particleArray[i].size, data.particleArray[i].size/2, Math.atan(data.particleArray[i].vy/data.particleArray[i].vx), 0, 2 * Math.PI);
-                    //data.ctx.arc(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size ,0, Math.PI*2);
-                    data.ctx.fill();
-                    data.ctx.closePath();
+                        if (data.particleArray[i] != null) {
+                            if (data.particleArray[i].alive == 0) {
+                                data.particleArray[i].x = data.x;
+                                data.particleArray[i].y = data.y;
+
+                            }
+                            data.particleArray[i].alive = 1;
+                            data.ctx.beginPath();
+                            data.ctx.fillStyle = color;//"orange"//color/*'#0095DD'*/;
+                            data.ctx.ellipse(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size, data.particleArray[i].size/2, Math.atan(data.particleArray[i].vy/data.particleArray[i].vx), 0, 2 * Math.PI);
+                            //data.ctx.ellipse(data.x, data.y, data.particleArray[i].size, data.particleArray[i].size/2, Math.atan(data.particleArray[i].vy/data.particleArray[i].vx), 0, 2 * Math.PI);
+                            //data.ctx.arc(data.particleArray[i].x, data.particleArray[i].y, data.particleArray[i].size ,0, Math.PI*2);
+                            data.ctx.fill();
+                            data.ctx.closePath();
                         
                         
             
             
 
-                 if(data.particleArray[i].size > 1){ 
+                             if(data.particleArray[i].size > 1){ 
                      
-                     if(data.particleArray[i].vx + data.particleArray[i].x > data.width-10 || data.particleArray[i].vx + data.particleArray[i].x < 10){
-                            data.particleArray[i].vx =-1*data.particleArray[i].vx;
+                                 if(data.particleArray[i].vx + data.particleArray[i].x > data.width-10 || data.particleArray[i].vx + data.particleArray[i].x < 10){
+                                        data.particleArray[i].vx =-1*data.particleArray[i].vx;
                         
-                        }
-                     data.particleArray[i].y += data.particleArray[i].vy;
-                     data.particleArray[i].x += data.particleArray[i].vx;
-                     data.particleArray[i].size *= 0.97;
-                     data.particleArray[i].vy += 0.15 
-                     data.particleArray[i].vx *= 0.98
+                                    }
+                                 data.particleArray[i].y += data.particleArray[i].vy;
+                                 data.particleArray[i].x += data.particleArray[i].vx;
+                                 data.particleArray[i].size *= 0.96;
+                                 data.particleArray[i].vy += 0.20 
+                                 data.particleArray[i].vx *= 0.98
 
                     
 
-                    }
-                  else{ 
+                                }
+                              else{ 
                       
-                      data.particleArray.splice(i,1);
+                                  data.particleArray.splice(i,1);
 
                     
 
 
-                  }
+                              }
                     
+                        }
+
                     }
+
+                    
+                
                     
 
                 }
@@ -309,26 +325,44 @@
     for(var c=0; c<data.brickColumnCount; c++){
 		data.bricks[c] = []; //array contained static objects
 		for(var r=0; r<data.brickRowCount; r++){
-			data.bricks[c][r] = { x: 0, y: 0, status: 1 };
+			data.bricks[c][r] = { x: 0, y: 0, status: 1, counterX: 1, counterY: 1 };
 		}
 	}
 	
 	function drawBricks(){
 		for(var c=0; c<data.brickColumnCount; c++) {
 			for(var r=0; r<data.brickRowCount; r++){
-				if(data.bricks[c][r].status == 1){
-					var brickX = (c*(data.brickWidth+data.brickPadding))+data.brickOffsetLeft;
-					var brickY = (r*(data.brickHeight+data.brickPadding))+data.brickOffsetTop;
-					data.bricks[c][r].x = brickX;
-					data.bricks[c][r].y = brickY;
+                if (data.bricks[c][r].status == 1) {
+                    var brickX = (c * (data.brickWidth + data.brickPadding)) + data.brickOffsetLeft;
+                    var brickY = (r * (data.brickHeight + data.brickPadding)) + data.brickOffsetTop;
+                    data.bricks[c][r].x = brickX;
+                    data.bricks[c][r].y = brickY;
                     ctx.beginPath();
                     ctx.drawImage(box_image, brickX, brickY, data.brickHeight, data.brickHeight);
-					//ctx.rect(brickX, brickY, data.brickWidth, data.brickHeight);
-					//ctx.arc(brickX+brickPadding, brickY, brickWidth/2, 0, Math.PI*2 );
-					//ctx.fillStyle = "#0095DD";
-					ctx.fill();
-					ctx.closePath();
-				}
+                    //ctx.rect(brickX, brickY, data.brickWidth, data.brickHeight);
+                    //ctx.arc(brickX+brickPadding, brickY, brickWidth/2, 0, Math.PI*2 );
+                    //ctx.fillStyle = "#0095DD";
+                    ctx.fill();
+                    ctx.closePath();
+                }
+                else if (data.bricks[c][r].status == 2) {
+                    var brickX = (c * (data.brickWidth + data.brickPadding)) + data.brickOffsetLeft;
+                    var brickY = (r * (data.brickHeight + data.brickPadding)) + data.brickOffsetTop;
+                    data.bricks[c][r].x = brickX;
+                    data.bricks[c][r].y = brickY;
+                    var counterX = data.bricks[c][r].counterX;
+                    var counterY = data.bricks[c][r].counterY;
+                    ctx.beginPath();
+                    
+                    //ctx.drawImage(box_image, brickX, brickY, data.brickHeight - counter, data.brickHeight - counter);
+                    ctx.drawImage(explosion_imgs[counterY], brickX, brickY, data.brickHeight, data.brickHeight);
+                    //ctx.drawImage(explosion_img, 110 * counterY, 32 * counterX, 71, 71, brickX, brickY, data.brickHeight, data.brickHeight);
+                    //ctx.rect(brickX, brickY, data.brickWidth, data.brickHeight);
+                    //ctx.arc(brickX+brickPadding, brickY, brickWidth/2, 0, Math.PI*2 );
+                    //ctx.fillStyle = "#0095DD";
+                    ctx.fill();
+                    ctx.closePath();
+                }
 			}
 		}
 	}
@@ -341,29 +375,60 @@
 	}
 	
 //Static Object detection
-	function collisionDetection(){
+    function collisionDetection() {
+        var counter = 0;
 		for(var c=0; c<data.brickColumnCount; c++){
 			for(var r=0; r<data.brickRowCount; r++){
 				var b = data.bricks[c][r];
-				if(b.status == 1){
-					if( data.x > b.x && data.x < b.x+data.brickWidth && data.y > b.y && data.y < b.y+data.brickHeight){
-						//dy = (105/100)*dy;
-						b.status = 0;
-						
-						//pbox_explosion.particleArray = data.particleArray; 
+                if (b.status == 1) {
+                    if (data.x > b.x && data.x < b.x + data.brickWidth && data.y > b.y && data.y < b.y + data.brickHeight) {
+                        //dy = (105/100)*dy;
+                        b.status = 2
+
+                        //b.status = 0;
+
+                        //pbox_explosion.particleArray = data.particleArray; 
                         pbox_explosion.particleSetup();
                         data.particle_select = 0;
                         //data.box_particleArray = data.particleArray;
-						//pbox_explosion.createParticle();
-						
-						//if(mainScore == brickRowCount*brickColumnCount){ //if all the blocks are gone
-							//alert("YOU WIN, CONGRATS");
-							//document.location.reload();
-							//clearInterval(interval); //needed for Chrome
-						//}
-					}
-					
-				}
+                        //pbox_explosion.createParticle();
+
+                        //if(mainScore == brickRowCount*brickColumnCount){ //if all the blocks are gone
+                        //alert("YOU WIN, CONGRATS");
+                        //document.location.reload();
+                        //clearInterval(interval); //needed for Chrome
+                        //}
+                    }
+
+                }
+                else if (b.status == 2) {
+
+                    if(b.counterY < 63) {
+                        b.counterY++;
+                    }
+                    else{
+                        b.status = 0;
+                    }
+
+
+                    
+                    /*if (b.counterY < 7) {
+                        if (b.counterX < 9) {
+                            b.counterX++;
+                        }
+                        else {
+                            b.counterY++;
+                            b.counterX = 1;
+                        }
+
+                        
+                    }
+                    else {
+                        b.status = 0;
+                        b.counterX = 1;
+                        b.counterY = 1;
+                    }*/
+                }
 			}
 		}
 	}
@@ -425,16 +490,16 @@
         {
             switch(data.particle_select){
             case 0:
-                pbox_explosion.drawParticle('#0095DD');
+                pbox_explosion.drawParticle("orange");
                 break;
             case 1:
-                wall_explosion.drawParticle("white");
+                wall_explosion.drawParticle('#42e3ff');
                 break;
             case 2:
-                padr_explosion.drawParticle("red");
+                padr_explosion.drawParticle('#42e3ff');
                 break;
             case 3:
-                padb_explosion.drawParticle("blue");
+                padb_explosion.drawParticle('#42e3ff');
                 break;
                 
             default:
